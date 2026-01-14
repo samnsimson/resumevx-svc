@@ -1,5 +1,6 @@
 import httpx
 from fastapi import HTTPException, Request
+from app.auth.model import AuthSession, AuthUser
 from app.config import settings
 
 
@@ -25,8 +26,8 @@ async def auth_guard(request: Request) -> None:
         response_data = await get_auth_session(token)
         user_data = response_data["user"] if 'user' in response_data else None
         session_data = response_data["session"] if 'session' in response_data else None
-        setattr(request.state, "user", user_data)
-        setattr(request.state, "session", session_data)
+        setattr(request.state, "user", AuthUser.model_validate(user_data))
+        setattr(request.state, "session", AuthSession.model_validate(session_data))
     except Exception as e:
         print(f"Error fetching session: {str(e)}")
         raise HTTPException(status_code=401, detail="Unauthorized")

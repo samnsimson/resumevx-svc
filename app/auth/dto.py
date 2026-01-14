@@ -1,8 +1,9 @@
-from uuid import UUID
+
 from typing import Literal, Optional
 from sqlmodel import Field
 from app.database.models import User, Session
 from app.lib.model import BaseModel
+from app.auth.model import AuthSession, AuthUser
 
 
 class SignupDto(BaseModel):
@@ -47,3 +48,8 @@ class VerifyEmailRequest(BaseModel):
 class VerifyEmailResponse(BaseModel):
     status: Literal["success", "failed"] = Field(description="Status")
     message: Optional[str] = Field(default=None, description="Message")
+
+
+class AuthUserSession(BaseModel):
+    user: AuthUser = Field(description="User")
+    session: AuthSession = Field(description="Session")
