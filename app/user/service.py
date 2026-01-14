@@ -15,12 +15,8 @@ class UserService:
         if not user: raise HTTPException(status_code=404, detail="User not found")
         return user
 
-    async def get_by_username_or_email(self, username: str) -> User:
-        return await self.user_repository.get_by_username_or_email(username)
-
-    async def create_user(self, data: CreateUserDto, commit: bool = False):
-        user = User(name=data.name, username=data.username, email=data.email)
-        return await self.user_repository.create(user, commit=commit)
+    async def get_local_user(self, auth_user_id: str) -> User | None:
+        return await self.user_repository.get_local_user(auth_user_id)
 
     async def update_user(self, user_id: UUID, data: User, commit: bool = False) -> User:
         return await self.user_repository.update(user_id, data, commit=commit)

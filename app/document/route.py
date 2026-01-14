@@ -10,6 +10,7 @@ from app.lib.responses import PDF_RESPONSE_200
 from app.usage.service import UsageService
 from app.session_state.service import SessionStateService
 from app.session_state.dto import SessionStateDto
+from app.user.service import UserService
 from fastapi.responses import FileResponse
 from app.document.task import cleanup_temp_file
 
@@ -21,8 +22,17 @@ router = APIRouter(tags=["document"])
 async def upload_document(request: Request, session: TransactionSession, user_session: AuthSession, file: UploadFile = File(...)):
     document_service = DocumentService(session)
     session_state_service = SessionStateService(session)
+    user_service = UserService(session)
+
+    user = await user_service.get_local_user(user_session.user.id)
+    if not user: raise HTTPException(status_code=404, detail="User not found")
     result = await document_service.upload_document(file, user_session.user.id)
-    session_state_dto = SessionStateDto(session_id=user_session.session.id, document_name=result.filename, document_url=result.file_url)
+    session_state_dto = SessionStateDto(
+        user_id=user.id,
+        better_auth_session_token=user_session.session.token,
+        document_name=result.filename,
+        document_url=result.file_url
+    )
     await session_state_service.create_or_update_session_state(session_state_dto)
     return result
 
@@ -32,8 +42,16 @@ async def upload_document(request: Request, session: TransactionSession, user_se
 async def parse_document(request: Request, session: TransactionSession, user_session: AuthSession, file: UploadFile = File(...)):
     document_service = DocumentService(session)
     session_state_service = SessionStateService(session)
+    user_service = UserService(session)
+
+    user = await user_service.get_local_user(user_session.user.id)
+    if not user: raise HTTPException(status_code=404, detail="User not found")
     result = await document_service.parse_document(file)
-    session_state_dto = SessionStateDto(session_id=user_session.session.id, document_parsed=result)
+    session_state_dto = SessionStateDto(
+        user_id=user.id,
+        better_auth_session_token=user_session.session.token,
+        document_parsed=result
+    )
     await session_state_service.create_or_update_session_state(session_state_dto)
     return result
 
@@ -43,8 +61,17 @@ async def parse_document(request: Request, session: TransactionSession, user_ses
 async def extract_document(request: Request, data: ExtractDocumentRequest, session: TransactionSession, user_session: AuthSession):
     document_service = DocumentService(session)
     session_state_service = SessionStateService(session)
+    user_service = UserService(session)
+
+    user = await user_service.get_local_user(user_session.user.id)
+    if not user: raise HTTPException(status_code=404, detail="User not found")
     result = await document_service.extract_document(data.file_content)
-    session_state_dto = SessionStateDto(session_id=user_session.session.id, document_data=result, generated_document_data=result)
+    session_state_dto = SessionStateDto(
+        user_id=user.id,
+        better_auth_session_token=user_session.session.token,
+        document_data=result,
+        generated_document_data=result
+    )
     await session_state_service.create_or_update_session_state(session_state_dto)
     return result
 
@@ -56,12 +83,19 @@ async def rewrite_document(request: Request, data: RewriteDocumentInput, session
         document_service = DocumentService(session)
         usage_service = UsageService(session)
         session_state_service = SessionStateService(session)
-        session_id = user_session.session.id
-        session_state = await session_state_service.get_by_session_id(session_id)
+        user_service = UserService(session)
+
+        user = await user_service.get_local_user(user_session.user.id)
+        if not user: raise HTTPException(status_code=404, detail="User not found")
+        session_state = await session_state_service.get_by_user_id(user.id)
         if not session_state: raise HTTPException(status_code=404, detail="Please upload and parse a document first.")
         response = await document_service.rewrite_document(session_state=session_state, input_message=data.input_message)
-        session_state_dto = SessionStateDto(session_id=session_id, generated_document_data=response.data)
-        await usage_service.increment_rewrites(user_session.user.id)
+        session_state_dto = SessionStateDto(
+            user_id=user.id,
+            better_auth_session_token=user_session.session.token,
+            generated_document_data=response.data
+        )
+        await usage_service.increment_rewrites(user.id)
         await session_state_service.create_or_update_session_state(session_state_dto)
         return response
     except HTTPException:
@@ -89,9 +123,14 @@ async def generate_document(request: Request, data: GenerateDocumentRequest, ses
 async def save_document(request: Request, session: TransactionSession, user_session: AuthSession, file: UploadFile = File(...)):
     document_service = DocumentService(session)
     session_state_service = SessionStateService(session)
+    user_service = UserService(session)
+
+    user = await user_service.get_local_user(user_session.user.id)
+    if not user: raise HTTPException(status_code=404, detail="User not found")
     result = await document_service.save_document(file, user_session.user.id)
     await session_state_service.create_or_update_session_state(SessionStateDto(
-        session_id=user_session.session.id,
+        user_id=user.id,
+        better_auth_session_token=user_session.session.token,
         document_name=result.filename,
         document_url=result.file_url,
         generated_document_name=result.filename,

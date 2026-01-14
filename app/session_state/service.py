@@ -10,11 +10,11 @@ class SessionStateService:
         self.session = session
         self.session_state_repository = SessionStateRepository(session)
 
-    async def get_by_session_id(self, session_id: UUID) -> SessionState | None:
-        return await self.session_state_repository.get_by_session_id(session_id)
+    async def get_by_user_id(self, user_id: UUID) -> SessionState | None:
+        return await self.session_state_repository.get_by_user_id(user_id)
 
     async def create_or_update_session_state(self, data: SessionStateDto) -> SessionState:
-        session_state = await self.get_by_session_id(data.session_id)
+        session_state = await self.get_by_user_id(data.user_id)
         if not session_state: return await self.create_session_state(SessionStateDto(**data.model_dump(exclude_unset=True)))
         return await self.update_session_state(session_state.id, SessionStateDto(**data.model_dump(exclude_unset=True)))
 
@@ -26,8 +26,8 @@ class SessionStateService:
         session_state = SessionState(**data.model_dump(exclude_unset=True))
         return await self.session_state_repository.update(id, session_state)
 
-    async def delete_session_state(self, session_id: UUID) -> None:
-        await self.session_state_repository.delete(session_id)
+    async def delete_session_state(self, user_id: UUID) -> None:
+        await self.session_state_repository.delete_by_user_id(user_id)
 
-    async def delete_by_session_id(self, session_id: UUID) -> bool:
-        return await self.session_state_repository.delete_by_session_id(session_id)
+    async def delete_by_user_id(self, user_id: UUID) -> bool:
+        return await self.session_state_repository.delete_by_user_id(user_id)

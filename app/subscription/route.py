@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, HTTPException
 from app.database.models import Subscription
+from app.user.service import UserService
 from app.subscription.service import SubscriptionService
 from app.subscription.dto import UpdateSubscriptionRequest, CancelSubscriptionRequest, CreateCheckoutSessionDto, CheckoutSession, CreatePortalSessionDto, PortalSession
 from app.subscription.webhook import handle_stripe_webhook
@@ -11,7 +12,10 @@ router = APIRouter(tags=["subscriptions"])
 @router.get("/subscription", operation_id="getSubscription", response_model=Subscription | None)
 async def get_by_user_id(session: DatabaseSession, user_session: AuthSession):
     subscription_service = SubscriptionService(session)
-    subscription = await subscription_service.get_by_user_id(user_session.user.id)
+    user_service = UserService(session)
+    local_user = await user_service.get_local_user(user_session.user.id)
+    if not local_user: raise HTTPException(status_code=404, detail="User not found")
+    subscription = await subscription_service.get_by_user_id(local_user.id)
     if not subscription: return None
     return subscription
 
@@ -19,28 +23,40 @@ async def get_by_user_id(session: DatabaseSession, user_session: AuthSession):
 @router.put("/subscription", operation_id="updateSubscription", response_model=Subscription)
 async def update_subscription(data: UpdateSubscriptionRequest, session: TransactionSession, user_session: AuthSession):
     subscription_service = SubscriptionService(session)
-    subscription = await subscription_service.update_subscription_plan(user_session.user.id, data.price_id)
+    user_service = UserService(session)
+    local_user = await user_service.get_local_user(user_session.user.id)
+    if not local_user: raise HTTPException(status_code=404, detail="User not found")
+    subscription = await subscription_service.update_subscription_plan(local_user.id, data.price_id)
     return subscription
 
 
 @router.post("/subscription/cancel", operation_id="cancelSubscription", response_model=Subscription)
 async def cancel_subscription(data: CancelSubscriptionRequest, session: TransactionSession, user_session: AuthSession):
     subscription_service = SubscriptionService(session)
-    subscription = await subscription_service.cancel_subscription(user_session.user.id, data.cancel_immediately)
+    user_service = UserService(session)
+    local_user = await user_service.get_local_user(user_session.user.id)
+    if not local_user: raise HTTPException(status_code=404, detail="User not found")
+    subscription = await subscription_service.cancel_subscription(local_user.id, data.cancel_immediately)
     return subscription
 
 
 @router.post("/checkout", operation_id="createCheckoutSession", response_model=CheckoutSession)
 async def create_checkout_session(data: CreateCheckoutSessionDto, session: TransactionSession, user_session: AuthSession):
     subscription_service = SubscriptionService(session)
-    url = await subscription_service.create_checkout_session(user_session.user, data.price_id, data.success_url, data.cancel_url)
+    user_service = UserService(session)
+    local_user = await user_service.get_local_user(user_session.user.id)
+    if not local_user: raise HTTPException(status_code=404, detail="User not found")
+    url = await subscription_service.create_checkout_session(local_user, data.price_id, data.success_url, data.cancel_url)
     return CheckoutSession(url=url)
 
 
 @router.post("/portal", operation_id="createPortalSession", response_model=PortalSession)
 async def create_portal_session(data: CreatePortalSessionDto, session: TransactionSession, user_session: AuthSession):
     subscription_service = SubscriptionService(session)
-    url = await subscription_service.create_portal_session(user_session.user, data.return_url)
+    user_service = UserService(session)
+    local_user = await user_service.get_local_user(user_session.user.id)
+    if not local_user: raise HTTPException(status_code=404, detail="User not found")
+    url = await subscription_service.create_portal_session(local_user, data.return_url)
     return PortalSession(url=url)
 
 

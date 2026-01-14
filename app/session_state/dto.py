@@ -6,7 +6,8 @@ from app.document.dto import DocumentData
 
 
 class SessionStateDto(BaseModel):
-    session_id: UUID = Field(description="Session ID")
+    user_id: UUID = Field(description="User ID (references better-auth user via User model)")
+    better_auth_session_token: Optional[str] = Field(default=None, nullable=True, description="Session token from better-auth for reference")
     template_name: Optional[str] = Field(default=None, nullable=True, description="Template name")
     document_name: Optional[str] = Field(default=None, nullable=True, description="Document name")
     document_url: Optional[str] = Field(default=None, nullable=True, description="Document URL")

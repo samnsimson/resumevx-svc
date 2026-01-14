@@ -3,7 +3,7 @@ from typing import Optional, List, Dict, Any
 from uuid import uuid4, UUID
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import DateTime, Field, Relationship, func
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from app.document.dto import DocumentData
 from app.lib.model import BaseModel
 from pydantic import field_serializer
@@ -11,15 +11,6 @@ from pydantic import field_serializer
 
 def default_time():
     return datetime.now(timezone.utc)
-
-
-def default_expires_at():
-    return datetime.now(timezone.utc) + timedelta(days=30)
-
-
-class VerificationType(str, Enum):
-    OTP = "otp"
-    LINK = "link"
 
 
 class Plan(str, Enum):
@@ -36,43 +27,12 @@ class BaseSQLModel(BaseModel):
 
 
 class User(BaseSQLModel, table=True):
-    name: str = Field()
-    username: str = Field(unique=True, index=True)
-    email: str = Field(unique=True, index=True)
-    email_verified: bool = Field(default=False)
-    account: "Account" = Relationship(back_populates="user", cascade_delete=True)
-    sessions: List["Session"] = Relationship(back_populates="user", cascade_delete=True)
-    verifications: List["Verification"] = Relationship(back_populates="user", cascade_delete=True)
+    auth_user_id: str = Field(unique=True, index=True, description="User ID from better-auth service")
+    email: Optional[str] = Field(default=None, nullable=True, index=True, description="Email for reference (synced from better-auth)")
     resumes: List["Resume"] = Relationship(back_populates="user", cascade_delete=True)
     subscription: Optional["Subscription"] = Relationship(back_populates="user", cascade_delete=True, sa_relationship_kwargs={"uselist": False})
     usage: List["Usage"] = Relationship(back_populates="user", cascade_delete=True)
-
-
-class Account(BaseSQLModel, table=True):
-    user_id: UUID = Field(foreign_key="user.id", ondelete="CASCADE")
-    provider_id: Optional[str] = Field(default=None, nullable=True)
-    access_token: Optional[str] = Field(default=None, nullable=True)
-    refresh_token: Optional[str] = Field(default=None, nullable=True)
-    expires_at: Optional[datetime] = Field(default=None, nullable=True)
-    password: str = Field(min_length=8, max_length=128)
-    user: "User" = Relationship(back_populates="account")
-
-
-class Session(BaseSQLModel, table=True):
-    user_id: UUID = Field(foreign_key="user.id", ondelete="CASCADE")
-    session_token: str = Field(unique=True, index=True)
-    expires_at: datetime = Field(default_factory=default_expires_at, nullable=False, sa_type=DateTime(timezone=True))
-    state: "SessionState" = Relationship(back_populates="session", cascade_delete=True)
-    user: "User" = Relationship(back_populates="sessions")
-
-
-class Verification(BaseSQLModel, table=True):
-    user_id: UUID = Field(foreign_key="user.id", ondelete="CASCADE")
-    identifier: str = Field(description="Identifier")
-    type: VerificationType = Field(default=VerificationType.OTP, description="Verification type")
-    token: str = Field(unique=True, index=True, description="Verification token")
-    expires_at: datetime = Field(default_factory=default_expires_at, nullable=False, sa_type=DateTime(timezone=True))
-    user: "User" = Relationship(back_populates="verifications")
+    session_states: List["SessionState"] = Relationship(back_populates="user", cascade_delete=True)
 
 
 class Resume(BaseSQLModel, table=True):
@@ -112,7 +72,8 @@ class Usage(BaseSQLModel, table=True):
 
 class SessionState(BaseSQLModel, table=True):
     __tablename__ = "session_state"
-    session_id: UUID = Field(foreign_key="session.id", ondelete="CASCADE")
+    user_id: UUID = Field(foreign_key="user.id", ondelete="CASCADE", index=True, description="User ID - references better-auth user via User model")
+    better_auth_session_token: Optional[str] = Field(default=None, nullable=True, index=True, description="Session token from better-auth for reference")
     template_name: Optional[str] = Field(default=None, nullable=True)
     document_name: Optional[str] = Field(default=None, nullable=True)
     document_url: Optional[str] = Field(default=None, nullable=True)
@@ -122,7 +83,7 @@ class SessionState(BaseSQLModel, table=True):
     genereated_document_url: Optional[str] = Field(default=None, nullable=True)
     generated_document_data: Optional[Dict[str, Any]] = Field(sa_type=JSONB, default=None, nullable=True)
     job_description: Optional[str] = Field(default=None, nullable=True)
-    session: "Session" = Relationship(back_populates="state")
+    user: "User" = Relationship(back_populates="session_states")
 
     @field_serializer("document_data")
     def serialize_document_data(self, document_data: Dict[str, Any] | None) -> DocumentData | None:

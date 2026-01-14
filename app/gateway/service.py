@@ -5,13 +5,15 @@ from uuid import UUID
 from asyncio import Queue, Task
 from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.database.models import Session, User
+from app.auth.model import AuthUser, AuthSession
+from app.database.models import User
 from app.document.dto import DocumentData, UploadDocumentResult
 from app.document.service import DocumentService
 from app.gateway.dto import EventStatus, ProcessInputDto, EventResponse
 from app.gateway.emitter import ProgressEmitter
 from app.session_state.dto import SessionStateDto
 from app.session_state.service import SessionStateService
+from app.user.service import UserService
 from app.lib.constants import (
     GATEWAY_QUEUE_TIMEOUT,
     GATEWAY_STREAM_CANCELLED,
@@ -30,9 +32,14 @@ class GatewayService:
         self.document_service = DocumentService(session)
         self.session_state_service = SessionStateService(session)
 
-    def _get_session_state_dto(self, upload_result: UploadDocumentResult, parsed_content: str, extracted_data: DocumentData, data: ProcessInputDto, session: Session) -> SessionStateDto:
+    async def _get_session_state_dto(self, upload_result: UploadDocumentResult, parsed_content: str, extracted_data: DocumentData, data: ProcessInputDto, auth_user: AuthUser, auth_session: AuthSession) -> SessionStateDto:
+
+        user_service = UserService(self.session)
+        user = await user_service.get_local_user(auth_user.id)
+        if not user: raise HTTPException(status_code=404, detail="User not found")
         return SessionStateDto(
-            session_id=session.id,
+            user_id=user.id,
+            better_auth_session_token=auth_session.token,
             document_name=upload_result.filename,
             document_url=upload_result.file_url,
             document_parsed=parsed_content,
@@ -82,12 +89,16 @@ class GatewayService:
         await self.emitter.emit(EventStatus.extracting)
         return await self.document_service.extract_document(parsed_content)
 
-    async def process_input_data(self, file: UploadFile, data: ProcessInputDto, user: User, session: Session):
+    async def process_input_data(self, file: UploadFile, data: ProcessInputDto, auth_user: AuthUser, auth_session: AuthSession):
         try:
+
+            user_service = UserService(self.session)
+            user = await user_service.get_local_user(auth_user.id)
+            if not user: raise HTTPException(status_code=404, detail="User not found")
             upload_result = await self.upload(file, user.id)
             parsed_content = await self.parse(file)
             extracted_data = await self.extract(parsed_content)
-            session_state_dto = self._get_session_state_dto(upload_result, parsed_content, extracted_data, data, session)
+            session_state_dto = await self._get_session_state_dto(upload_result, parsed_content, extracted_data, data, auth_user, auth_session)
             await self.save(session_state_dto)
             await self.emitter.emit(EventStatus.success)
         except Exception as e:

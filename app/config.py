@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     cookie_domain: Optional[str] = Field(default=None, env="COOKIE_DOMAIN")
     api_key: Optional[str] = Field(default=None, env="API_KEY")
     app_url: Optional[str] = Field(default=None, env="APP_URL")
-    cookie_key: str = Field(default="resumevx:auth")
+    cookie_key: str = Field(default="better-auth.session_token")
     nebius_api_key: Optional[str] = Field(default=None, env="NEBIUS_API_KEY")
     nebius_api_url: Optional[str] = Field(default=None, env="NEBIUS_API_URL")
     nebius_model: Optional[str] = Field(default=None, env="NEBIUS_MODEL")
@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     stripe_webhook_secret: Optional[str] = Field(default=None, env="STRIPE_WEBHOOK_SECRET")
     docling_url: Optional[str] = Field(default=None, env="DOCLING_URL")
     better_auth_url: Optional[str] = Field(env="BETTER_AUTH_URL")
+    better_auth_docs: Optional[str] = Field(env="BETTER_AUTH_DOCS")
 
     class Config:
         env_file = ".env"
