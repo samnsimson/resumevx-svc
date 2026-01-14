@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     stripe_secret_key: Optional[str] = Field(default=None, env="STRIPE_SECRET_KEY")
     stripe_webhook_secret: Optional[str] = Field(default=None, env="STRIPE_WEBHOOK_SECRET")
     docling_url: Optional[str] = Field(default=None, env="DOCLING_URL")
+    better_auth_url: Optional[str] = Field(env="BETTER_AUTH_URL")
 
     class Config:
         env_file = ".env"

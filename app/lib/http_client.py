@@ -27,6 +27,7 @@ class HttpClient:
 
     async def _make_request(self, method: str, url: str, headers: Optional[Dict[str, str]] = None, params: Optional[Dict[str, Any]] = None, json: Optional[Dict[str, Any]] = None, data: Optional[Union[str, bytes, Dict[str, Any]]] = None, files: Optional[Dict[str, Any]] = None, timeout: Optional[float] = None, **kwargs) -> httpx.Response:
         full_url = url if not self.base_url or url.startswith("http") else f"{self.base_url.rstrip('/')}/{url.lstrip('/')}"
+        print("full_url", full_url)
         merged_headers = {**self.default_headers, **(headers or {})}
         request_timeout = timeout if timeout is not None else self.timeout
         try:
