@@ -5,7 +5,6 @@ from app.config import settings
 
 
 async def get_auth_session(token: str) -> AuthUserSession | None:
-    print(f"Token: {token}")
     async with httpx.AsyncClient() as client:
         url = f"{settings.better_auth_url}/get-session"
         headers = {"Authorization": f"Bearer {token}"}

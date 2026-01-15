@@ -26,3 +26,6 @@ class UserService:
 
     async def delete_user(self, user_id: UUID) -> None:
         await self.user_repository.delete(user_id)
+
+    async def delete_local_user(self, auth_user_id: str) -> bool:
+        return await self.user_repository.delete_local_user(auth_user_id)

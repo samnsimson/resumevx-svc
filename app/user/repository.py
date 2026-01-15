@@ -18,3 +18,9 @@ class UserRepository(Repository[User]):
         stmt = select(User).where(User.auth_user_id == auth_user_id)
         result = await self.session.exec(stmt)
         return result.first()
+
+    async def delete_local_user(self, auth_user_id: str) -> bool:
+        user = await self.get_local_user(auth_user_id)
+        if not user: return
+        await self.delete(user.id)
+        return True
