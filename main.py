@@ -11,6 +11,7 @@ from app.error_handler import setup_error_handlers
 from app.auth.route import router as auth_router
 from app.user.route import router as user_router
 from app.gateway.route import router as gateway_router
+from app.webhook.route import router as webhook_router
 from app.document.route import router as document_router
 from app.subscription.route import router as subscription_router
 from app.session_state.route import router as session_state_router
@@ -40,7 +41,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"])
 app.add_middleware(LoggingMiddleware)
-# app.add_middleware(AuthMiddleware)
 
 app.include_router(auth_router, prefix="/auth")
 app.include_router(user_router, prefix="/user")
@@ -48,6 +48,7 @@ app.include_router(gateway_router, prefix="/gateway")
 app.include_router(document_router, prefix="/document")
 app.include_router(subscription_router, prefix="/subscriptions")
 app.include_router(session_state_router, prefix="/session-state")
+app.include_router(webhook_router, prefix="/webhook")
 
 
 setup_error_handlers(app)

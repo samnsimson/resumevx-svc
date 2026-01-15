@@ -28,7 +28,9 @@ class BaseSQLModel(BaseModel):
 
 class User(BaseSQLModel, table=True):
     auth_user_id: str = Field(unique=True, index=True, description="User ID from better-auth service")
-    email: Optional[str] = Field(default=None, nullable=True, index=True, description="Email for reference (synced from better-auth)")
+    name: Optional[str] = Field(default=None, nullable=True, description="Name from better-auth service")
+    username: Optional[str] = Field(default=None, nullable=True, unique=True, index=True, description="Username from better-auth service")
+    email: Optional[str] = Field(default=None, nullable=True, unique=True, index=True, description="Email for reference (synced from better-auth)")
     resumes: List["Resume"] = Relationship(back_populates="user", cascade_delete=True)
     subscription: Optional["Subscription"] = Relationship(back_populates="user", cascade_delete=True, sa_relationship_kwargs={"uselist": False})
     usage: List["Usage"] = Relationship(back_populates="user", cascade_delete=True)

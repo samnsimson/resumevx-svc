@@ -18,6 +18,9 @@ class UserService:
     async def get_local_user(self, auth_user_id: str) -> User | None:
         return await self.user_repository.get_local_user(auth_user_id)
 
+    async def create_local_user(self, data: CreateUserDto) -> User:
+        return await self.user_repository.create_local_user(data)
+
     async def update_user(self, user_id: UUID, data: User, commit: bool = False) -> User:
         return await self.user_repository.update(user_id, data, commit=commit)
 

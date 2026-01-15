@@ -5,6 +5,7 @@ from app.config import settings
 
 
 async def get_auth_session(token: str) -> AuthUserSession | None:
+    print(f"Token: {token}")
     async with httpx.AsyncClient() as client:
         url = f"{settings.better_auth_url}/get-session"
         headers = {"Authorization": f"Bearer {token}"}
@@ -29,7 +30,7 @@ async def auth_guard(request: Request) -> None:
     if not token: raise HTTPException(status_code=401, detail="Unauthorized")
 
     try:
-        token = token.split('.')[0] if '.' in token else token
+        # token = token.split('.')[0] if '.' in token else token
         auth_session = await get_auth_session(token)
         user_data, session_data = await extract_session_data(auth_session)
         setattr(request.state, "user", user_data)
