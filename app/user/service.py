@@ -1,7 +1,7 @@
 from uuid import UUID
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.database.models import User
-from app.user.dto import CreateUserDto
+from app.user.dto import CreateUserDto, UpdateUserDto
 from app.user.repository import UserRepository
 from fastapi import HTTPException
 
@@ -29,3 +29,6 @@ class UserService:
 
     async def delete_local_user(self, auth_user_id: str) -> bool:
         return await self.user_repository.delete_local_user(auth_user_id)
+
+    async def update_local_user(self, auth_user_id: str, data: UpdateUserDto) -> User:
+        return await self.user_repository.update_local_user(auth_user_id, data)
