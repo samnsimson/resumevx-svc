@@ -19,6 +19,6 @@ async def process_input_data(
     queue = Queue(maxsize=10)
     gateway_service = GatewayService(session, queue)
     data = ProcessInputDto(template_name=template_name, job_description=job_description)
-    task = asyncio.create_task(gateway_service.process_input_data(file, data, user_session.user, user_session.session))
+    task = asyncio.create_task(gateway_service.process_input_data(file, data, user_session.local_user, user_session.session))
     stream_headers = {"Cache-Control": "no-cache", "Connection": "keep-alive", "X-Accel-Buffering": "no"}
     return StreamingResponse(gateway_service._process_stream(task), media_type='text/event-stream', headers=stream_headers)
