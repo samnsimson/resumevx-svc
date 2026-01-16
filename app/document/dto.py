@@ -91,3 +91,27 @@ class ExtractDocumentRequest(BaseModel):
 class GenerateDocumentRequest(BaseModel):
     template_name: Optional[Literal["default", "modern", "classic"]] = Field(default="default", description="Template name: 'default', 'modern', or 'classic'")
     document_data: DocumentData = Field(description="Document data")
+
+
+class KeywordAnalysis(BaseModel):
+    matched_keywords: List[str] = Field(description="Keywords from job description found in resume")
+    missing_keywords: List[str] = Field(description="Important keywords from job description not found in resume")
+    keyword_strength_score: float = Field(description="Score from 0-100 indicating how well resume matches job keywords")
+
+
+class SectionAlignment(BaseModel):
+    score: float = Field(description="Alignment score from 0-100 for this section")
+    strengths: List[str] = Field(description="List of strengths/positive matches in this section")
+    weaknesses: List[str] = Field(description="List of weaknesses/missing elements in this section")
+    recommendations: List[str] = Field(description="Recommendations to improve this section")
+
+
+class DocumentMetricsOutput(BaseModel):
+    overall_match_score: float = Field(description="Overall match score from 0-100 indicating how well the resume matches the job description")
+    keyword_analysis: KeywordAnalysis = Field(description="Analysis of keyword matching between resume and job description")
+    skills_alignment: SectionAlignment = Field(description="Analysis of skills section alignment with job requirements")
+    experience_alignment: SectionAlignment = Field(description="Analysis of experience section alignment with job requirements")
+    education_alignment: SectionAlignment = Field(description="Analysis of education section alignment with job requirements")
+    summary_quality: SectionAlignment = Field(description="Analysis of professional summary quality and relevance")
+    ats_compatibility_score: float = Field(description="ATS compatibility score from 0-100 indicating how well the resume will parse through ATS systems")
+    overall_recommendations: List[str] = Field(description="Overall recommendations to improve resume match with job description")

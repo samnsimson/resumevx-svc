@@ -1,6 +1,6 @@
 import logging
 from fastapi import APIRouter, File, Request, UploadFile, BackgroundTasks, HTTPException
-from app.document.dto import DocumentData, DocumentDataOutput, ExtractDocumentRequest, GenerateDocumentRequest, RewriteDocumentInput, UploadDocumentResult
+from app.document.dto import DocumentData, DocumentDataOutput, DocumentMetricsOutput, ExtractDocumentRequest, GenerateDocumentRequest, RewriteDocumentInput, UploadDocumentResult
 from app.document.service import DocumentService
 from app.lib.annotations import AuthSession, TransactionSession
 from app.lib.annotations import UageGuard
@@ -115,3 +115,22 @@ async def save_document(request: Request, session: TransactionSession, user_sess
         generated_document_url=result.file_url
     ))
     return result
+
+
+@router.get("/metrics", operation_id="getDocumentMetrics", response_model=DocumentMetricsOutput)
+@limiter.limit("10/minute")
+async def get_document_metrics(request: Request, session: TransactionSession, user_session: AuthSession):
+    try:
+        document_service = DocumentService(session)
+        session_state_service = SessionStateService(session)
+        session_state = await session_state_service.get_by_user_id(user_session.local_user.id)
+        if not session_state: raise HTTPException(status_code=404, detail="Please upload and parse a document first.")
+        if not session_state.generated_document_data: raise HTTPException(status_code=404, detail="No resume data found. Please extract document data first.")
+        if not session_state.job_description: raise HTTPException(status_code=404, detail="No job description found. Please provide a job description first.")
+        metrics = await document_service.get_document_metrics(session_state=session_state)
+        return metrics
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Failed to get document metrics: {str(e)}")
+        raise
