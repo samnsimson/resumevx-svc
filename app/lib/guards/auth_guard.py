@@ -2,6 +2,9 @@ import httpx
 from fastapi import HTTPException, Request
 from app.auth.dto import AuthUserSession
 from app.config import settings
+from app.database import Database
+from app.database.models import User
+from app.user.service import UserService
 
 
 async def get_auth_session(token: str) -> AuthUserSession | None:
@@ -11,6 +14,14 @@ async def get_auth_session(token: str) -> AuthUserSession | None:
         response = await client.get(url, headers=headers)
         response.raise_for_status()
         return response.json()
+
+
+async def get_local_user(auth_user_id: str) -> User | None:
+    async with Database.async_session() as db:
+        user_service = UserService(db)
+        local_user = await user_service.get_local_user(auth_user_id)
+        if not local_user: raise HTTPException(status_code=401, detail="Unauthorized")
+        return local_user
 
 
 async def extract_session_data(auth_session: AuthUserSession | None):
@@ -29,11 +40,12 @@ async def auth_guard(request: Request) -> None:
     if not token: raise HTTPException(status_code=401, detail="Unauthorized")
 
     try:
-        # token = token.split('.')[0] if '.' in token else token
         auth_session = await get_auth_session(token)
         user_data, session_data = await extract_session_data(auth_session)
+        local_user = await get_local_user(user_data['id'])
         setattr(request.state, "user", user_data)
         setattr(request.state, "session", session_data)
+        setattr(request.state, "local_user", local_user)
     except Exception as e:
         print(f"Error fetching session: {str(e)}")
         raise HTTPException(status_code=401, detail="Unauthorized")

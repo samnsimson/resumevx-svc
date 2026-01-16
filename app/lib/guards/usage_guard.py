@@ -27,9 +27,8 @@ async def usage_guard(request: Request) -> Usage:
         return usage
 
     async with Database.async_session() as db:
-
         user_service = UserService(db)
-        local_user = await user_service.get_local_user(user.id)
+        local_user = await user_service.get_local_user(user['id'])
         if not local_user: raise HTTPException(status_code=404, detail="User not found")
         subscription = await _get_subscription(local_user.id, db)
         usage = await _get_usage(local_user.id, db)
