@@ -45,7 +45,7 @@ async def auth_guard(request: Request) -> None:
         local_user = await get_local_user(user_data['id'])
         setattr(request.state, "user", user_data)
         setattr(request.state, "session", session_data)
-        setattr(request.state, "local_user", local_user)
+        setattr(request.state, "local_user", local_user.model_dump())
     except Exception as e:
         print(f"Error fetching session: {str(e)}")
         raise HTTPException(status_code=401, detail="Unauthorized")

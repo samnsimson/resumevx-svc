@@ -20,9 +20,9 @@ router = APIRouter(tags=["document"])
 async def upload_document(request: Request, session: TransactionSession, user_session: AuthSession, file: UploadFile = File(...)):
     document_service = DocumentService(session)
     session_state_service = SessionStateService(session)
-    result = await document_service.upload_document(file, user_session.user.id)
+    result = await document_service.upload_document(file, user_session.local_user.id)
     session_state_dto = SessionStateDto(
-        user_id=user_session.user.id,
+        user_id=user_session.local_user.id,
         better_auth_session_token=user_session.session.token,
         document_name=result.filename,
         document_url=result.file_url
@@ -38,7 +38,7 @@ async def parse_document(request: Request, session: TransactionSession, user_ses
     session_state_service = SessionStateService(session)
     result = await document_service.parse_document(file)
     session_state_dto = SessionStateDto(
-        user_id=user_session.user.id,
+        user_id=user_session.local_user.id,
         better_auth_session_token=user_session.session.token,
         document_parsed=result
     )
@@ -53,7 +53,7 @@ async def extract_document(request: Request, data: ExtractDocumentRequest, sessi
     session_state_service = SessionStateService(session)
     result = await document_service.extract_document(data.file_content)
     session_state_dto = SessionStateDto(
-        user_id=user_session.user.id,
+        user_id=user_session.local_user.id,
         better_auth_session_token=user_session.session.token,
         document_data=result,
         generated_document_data=result
@@ -69,15 +69,15 @@ async def rewrite_document(request: Request, data: RewriteDocumentInput, session
         document_service = DocumentService(session)
         usage_service = UsageService(session)
         session_state_service = SessionStateService(session)
-        session_state = await session_state_service.get_by_user_id(user_session.user.id)
+        session_state = await session_state_service.get_by_user_id(user_session.local_user.id)
         if not session_state: raise HTTPException(status_code=404, detail="Please upload and parse a document first.")
         response = await document_service.rewrite_document(session_state=session_state, input_message=data.input_message)
         session_state_dto = SessionStateDto(
-            user_id=user_session.user.id,
+            user_id=user_session.local_user.id,
             better_auth_session_token=user_session.session.token,
             generated_document_data=response.data
         )
-        await usage_service.increment_rewrites(user_session.user.id)
+        await usage_service.increment_rewrites(user_session.local_user.id)
         await session_state_service.create_or_update_session_state(session_state_dto)
         return response
     except HTTPException:
@@ -105,9 +105,9 @@ async def generate_document(request: Request, data: GenerateDocumentRequest, ses
 async def save_document(request: Request, session: TransactionSession, user_session: AuthSession, file: UploadFile = File(...)):
     document_service = DocumentService(session)
     session_state_service = SessionStateService(session)
-    result = await document_service.save_document(file, user_session.user.id)
+    result = await document_service.save_document(file, user_session.local_user.id)
     await session_state_service.create_or_update_session_state(SessionStateDto(
-        user_id=user_session.user.id,
+        user_id=user_session.local_user.id,
         better_auth_session_token=user_session.session.token,
         document_name=result.filename,
         document_url=result.file_url,
