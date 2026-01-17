@@ -7,7 +7,7 @@ from app.document.dto import DocumentData, DocumentMetrics
 
 class SessionStateDto(BaseModel):
     user_id: UUID = Field(description="User ID (references better-auth user via User model)")
-    session_token: Optional[str] = Field(default=None, nullable=True, description="Session token from better-auth for reference")
+    session_token: str = Field(description="Session token from better-auth - unique identifier for session state")
     template_name: Optional[str] = Field(default=None, nullable=True, description="Template name")
     document_name: Optional[str] = Field(default=None, nullable=True, description="Document name")
     document_url: Optional[str] = Field(default=None, nullable=True, description="Document URL")
