@@ -1,8 +1,4 @@
-import asyncio
-import json
 import logging
-from uuid import UUID
-from asyncio import Queue, Task
 from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.model import AuthSession
@@ -10,24 +6,16 @@ from app.core.database.models import User
 from app.document.dto import DocumentData, UploadDocumentResult
 from app.document.service import DocumentService
 from app.gateway.dto import EventStatus, ProcessInputDto, EventResponse
-from app.gateway.emitter import ProgressEmitter
 from app.session_state.dto import SessionStateDto
 from app.session_state.service import SessionStateService
-from app.core.constants import (
-    GATEWAY_QUEUE_TIMEOUT,
-    GATEWAY_STREAM_CANCELLED,
-    GATEWAY_ERROR_IN_STREAM,
-    GATEWAY_ERROR_PROCESSING_INPUT_DATA,
-)
+from app.core.constants import GATEWAY_ERROR_PROCESSING_INPUT_DATA
 
 
 class GatewayService:
     logger = logging.getLogger(__name__)
 
-    def __init__(self, session: AsyncSession, queue: Queue):
-        self.queue = queue
+    def __init__(self, session: AsyncSession):
         self.session = session
-        self.emitter = ProgressEmitter(queue)
         self.document_service = DocumentService(session)
         self.session_state_service = SessionStateService(session)
 
@@ -44,56 +32,29 @@ class GatewayService:
             job_description=data.job_description,
         )
 
-    async def _process_stream(self, task: Task):
-        while True:
-            try:
-                message = await asyncio.wait_for(self.queue.get(), timeout=60.0)
-                if message is None: break
-                if isinstance(message, EventResponse): message_json = message.model_dump_json()
-                else: message_json = json.dumps(message)
-                yield f"data: {message_json}\n\n"
-            except asyncio.TimeoutError:
-                self.logger.warning(GATEWAY_QUEUE_TIMEOUT)
-                if not task.done(): task.cancel()
-                break
-            except asyncio.CancelledError:
-                self.logger.info(GATEWAY_STREAM_CANCELLED)
-                if not task.done(): task.cancel()
-                break
-            except Exception as e:
-                self.logger.error(GATEWAY_ERROR_IN_STREAM.format(error=str(e)))
-                if not task.done(): task.cancel()
-                yield f"data: {json.dumps({'status': 'error', 'message': str(e)})}\n\n"
-                break
-
-    async def upload(self, file: UploadFile, user_id: UUID):
-        await file.seek(0)
-        await self.emitter.emit(EventStatus.uploading)
-        return await self.document_service.upload_document(file, user_id)
-
-    async def save(self, data: SessionStateDto):
-        await self.emitter.emit(EventStatus.saving)
-        return await self.session_state_service.create_or_update_session_state(data)
-
-    async def parse(self, file: UploadFile):
-        await file.seek(0)
-        await self.emitter.emit(EventStatus.parsing)
-        return await self.document_service.parse_document(file)
-
-    async def extract(self, parsed_content: str):
-        await self.emitter.emit(EventStatus.extracting)
-        return await self.document_service.extract_document(parsed_content)
-
     async def process_input_data(self, file: UploadFile, data: ProcessInputDto, local_user: User, auth_session: AuthSession):
         try:
-            upload_result = await self.upload(file, local_user.id)
-            parsed_content = await self.parse(file)
-            extracted_data = await self.extract(parsed_content)
+            # Upload
+            await file.seek(0)
+            yield EventResponse(status=EventStatus.uploading)
+            upload_result = await self.document_service.upload_document(file, local_user.id)
+
+            # Parse
+            await file.seek(0)
+            yield EventResponse(status=EventStatus.parsing)
+            parsed_content = await self.document_service.parse_document(file=file, mode="accurate")
+
+            # Extract
+            yield EventResponse(status=EventStatus.extracting)
+            extracted_data = await self.document_service.extract_document(parsed_content)
+
+            # Save
+            yield EventResponse(status=EventStatus.saving)
             session_state_dto = await self._get_session_state_dto(upload_result, parsed_content, extracted_data, data, local_user, auth_session)
-            await self.save(session_state_dto)
-            await self.emitter.emit(EventStatus.success)
+            await self.session_state_service.create_or_update_session_state(session_state_dto)
+
+            # Success
+            yield EventResponse(status=EventStatus.success)
         except Exception as e:
             self.logger.error(GATEWAY_ERROR_PROCESSING_INPUT_DATA.format(error=str(e)))
-            await self.emitter.emit(EventStatus.failed, {"error": str(e)})
-        finally:
-            await self.emitter.close()
+            yield EventResponse(status=EventStatus.failed, data={"error": str(e)})

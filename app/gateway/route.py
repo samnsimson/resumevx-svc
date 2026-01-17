@@ -1,5 +1,3 @@
-import asyncio
-from asyncio import Queue
 from fastapi import APIRouter, File, Form, UploadFile
 from fastapi.responses import StreamingResponse
 from app.gateway.dto import ProcessInputDto
@@ -16,9 +14,12 @@ async def process_input_data(
         template_name: str = Form(...),
         job_description: str = Form(...),
         file: UploadFile = File(...)):
-    queue = Queue(maxsize=10)
-    gateway_service = GatewayService(session, queue)
+    gateway_service = GatewayService(session)
     data = ProcessInputDto(template_name=template_name, job_description=job_description)
-    task = asyncio.create_task(gateway_service.process_input_data(file, data, user_session.local_user, user_session.session))
-    stream_headers = {"Cache-Control": "no-cache", "Connection": "keep-alive", "X-Accel-Buffering": "no"}
-    return StreamingResponse(gateway_service._process_stream(task), media_type='text/event-stream', headers=stream_headers)
+    headers = {"Cache-Control": "no-cache", "Connection": "keep-alive", "X-Accel-Buffering": "no"}
+
+    async def stream():
+        async for event in gateway_service.process_input_data(file, data, user_session.local_user, user_session.session):
+            yield f"data: {event.model_dump_json()}\n\n"
+
+    return StreamingResponse(stream(), media_type='text/event-stream', headers=headers)
