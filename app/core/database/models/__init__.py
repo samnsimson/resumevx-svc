@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import Optional, List, Dict, Any
 from uuid import uuid4, UUID
 from sqlalchemy.dialects.postgresql import JSONB
@@ -13,13 +12,6 @@ def default_time():
     return datetime.now(timezone.utc)
 
 
-class Plan(str, Enum):
-    FREE = "free"
-    BASIC = "basic"
-    PREMIUM = "premium"
-    ENTERPRISE = "enterprise"
-
-
 class BaseSQLModel(BaseModel):
     id: UUID = Field(default_factory=uuid4, primary_key=True, index=True, nullable=False)
     created_at: datetime = Field(default_factory=default_time, nullable=False, sa_type=DateTime(timezone=True))
@@ -32,7 +24,6 @@ class User(BaseSQLModel, table=True):
     username: Optional[str] = Field(default=None, nullable=True, unique=True, index=True, description="Username from better-auth service")
     email: Optional[str] = Field(default=None, nullable=True, unique=True, index=True, description="Email for reference (synced from better-auth)")
     resumes: List["Resume"] = Relationship(back_populates="user", cascade_delete=True)
-    subscription: Optional["Subscription"] = Relationship(back_populates="user", cascade_delete=True, sa_relationship_kwargs={"uselist": False})
     usage: List["Usage"] = Relationship(back_populates="user", cascade_delete=True)
     session_states: List["SessionState"] = Relationship(back_populates="user", cascade_delete=True)
 
@@ -48,20 +39,6 @@ class Resume(BaseSQLModel, table=True):
     parsed_original: Optional[str] = Field(default=None, nullable=True)
     user_id: UUID = Field(foreign_key="user.id", ondelete="CASCADE")
     user: "User" = Relationship(back_populates="resumes")
-
-
-class Subscription(BaseSQLModel, table=True):
-    user_id: UUID = Field(foreign_key="user.id", unique=True, index=True, ondelete="CASCADE")
-    plan: Plan = Field(default=Plan.FREE)
-    stripe_customer_id: str = Field(nullable=False, unique=True, index=True)
-    stripe_subscription_id: Optional[str] = Field(default=None, nullable=True, unique=True, index=True)
-    stripe_price_id: Optional[str] = Field(default=None, nullable=True)
-    status: str = Field(default="active", description="Subscription status: active, canceled, past_due, etc.")
-    current_period_start: Optional[datetime] = Field(default=None, nullable=True, sa_type=DateTime(timezone=True))
-    current_period_end: Optional[datetime] = Field(default=None, nullable=True, sa_type=DateTime(timezone=True))
-    cancel_at_period_end: bool = Field(default=False)
-    canceled_at: Optional[datetime] = Field(default=None, nullable=True, sa_type=DateTime(timezone=True))
-    user: "User" = Relationship(back_populates="subscription")
 
 
 class Usage(BaseSQLModel, table=True):

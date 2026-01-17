@@ -64,7 +64,7 @@ async def extract_document(request: Request, data: ExtractDocumentRequest, sessi
 
 @router.post("/rewrite", operation_id="rewriteDocument", response_model=DocumentDataOutput)
 @limiter.limit("5/minute")
-async def rewrite_document(request: Request, data: RewriteDocumentInput, session: TransactionSession, user_session: AuthSession, usage: UageGuard):
+async def rewrite_document(request: Request, session: TransactionSession, user_session: AuthSession, usage: UageGuard, data: RewriteDocumentInput):
     try:
         document_service = DocumentService(session)
         usage_service = UsageService(session)
