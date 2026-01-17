@@ -1,13 +1,15 @@
 import os
-from typing import List
+from typing import List, Literal
 import boto3
 import aioboto3
 import tempfile
+from io import BytesIO
 from uuid import uuid4, UUID
 from datetime import datetime
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML
+from PyPDF2 import PdfReader
 from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi import UploadFile, HTTPException
 from app.core.config import settings
@@ -74,20 +76,40 @@ class DocumentService:
         try: return self.s3_client.get_object(Bucket=self.bucket_name, Key=file_key)['Body'].read()
         except Exception as e: raise HTTPException(status_code=500, detail=f"Failed to download document: {str(e)}")
 
-    async def parse_document(self, file: UploadFile) -> str:
+    def _parse_with_pypdf(self, file_content: bytes) -> str:
+        """Parse PDF using PyPDF2 for fast text extraction."""
+        try:
+            pdf_file = BytesIO(file_content)
+            pdf_reader = PdfReader(pdf_file)
+            text_parts = []
+            for page in pdf_reader.pages:
+                text = page.extract_text()
+                if text: text_parts.append(text)
+            if not text_parts: raise HTTPException(status_code=500, detail="Failed to extract text from PDF: no text content found")
+            return "\n\n".join(text_parts)
+        except HTTPException: raise
+        except Exception as e: raise HTTPException(status_code=500, detail=f"Failed to parse PDF with PyPDF2: {str(e)}")
+
+    async def _parse_with_docling(self, file_content: bytes, filename: str, content_type: str) -> str:
+        """Call Docling API to parse document and extract text content."""
+        files = {"files": (filename, file_content, content_type or "application/octet-stream")}
+        response = await self.docling_client.post("/v1/convert/file", files=files, data={"to_formats": ["text"]})
+        response.raise_for_status()
+        result = response.json()
+        if "document" in result and result["document"]:
+            document = result["document"]
+            if text_content := document.get("text_content"): return text_content
+            if md_content := document.get("md_content"): return md_content
+            raise HTTPException(status_code=500, detail="Document conversion succeeded but no text or markdown content was returned")
+        raise HTTPException(status_code=500, detail="Document conversion failed: no document in response")
+
+    async def parse_document(self, file: UploadFile, mode: Literal["fast", "accurate"] = "fast") -> str:
         try:
             await file.seek(0)
             file_content = await file.read()
             await file.seek(0)
-            files = {"files": (file.filename, file_content, file.content_type or "application/octet-stream")}
-            response = await self.docling_client.post("/v1/convert/file", files=files, data={"to_formats": ["text"]})
-            response.raise_for_status()
-            result = response.json()
-            if "document" in result and result["document"]:
-                document = result["document"]
-                if text_content := document.get("text_content"): return text_content
-                if md_content := document.get("md_content"): return md_content
-                raise HTTPException(status_code=500, detail="Document conversion succeeded but no text or markdown content was returned")
+            if mode == "fast": return self._parse_with_pypdf(file_content)
+            else: return await self._parse_with_docling(file_content, file.filename, file.content_type or "application/octet-stream")
         except HTTPException: raise
         except Exception as e: raise HTTPException(status_code=500, detail=f"Failed to parse document: {str(e)}")
 
@@ -113,7 +135,6 @@ class DocumentService:
         if template_name not in TEMPLATE_MAP:
             available_templates = ", ".join(TEMPLATE_MAP.keys())
             raise HTTPException(status_code=400, detail=ERROR_INVALID_TEMPLATE_NAME.format(available_templates=available_templates))
-
         template_dir_name = TEMPLATE_MAP[template_name]
         template_dir = Path(__file__).parent.parent / "core" / "templates"
         jinja_env = Environment(loader=FileSystemLoader(str(template_dir)))

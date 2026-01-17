@@ -37,6 +37,7 @@ async def parse_document(request: Request, session: TransactionSession, user_ses
     document_service = DocumentService(session)
     session_state_service = SessionStateService(session)
     result = await document_service.parse_document(file)
+    print(result)
     session_state_dto = SessionStateDto(
         user_id=user_session.local_user.id,
         session_token=user_session.session.token,

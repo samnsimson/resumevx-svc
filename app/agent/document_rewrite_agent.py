@@ -48,4 +48,5 @@ def message_history(ctx: RunContext[DocumentDependency]) -> str:
     This contains the message history of the conversation between the user and the assistant."""
     history = ctx.deps.message_history
     if not history: return "No message history found"
-    return f"Message history in structured JSON format: {json.dumps(history, indent=2)}"
+    history_dicts = [msg.model_dump() if hasattr(msg, 'model_dump') else msg for msg in history]
+    return f"Message history in structured JSON format: {json.dumps(history_dicts, indent=2, default=str)}"
