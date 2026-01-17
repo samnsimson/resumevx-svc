@@ -1,4 +1,5 @@
 import os
+from typing import List
 import boto3
 import aioboto3
 import tempfile
@@ -12,7 +13,7 @@ from fastapi import UploadFile, HTTPException
 from app.config import settings
 from app.database.models import SessionState
 from app.document.dto import DocumentData, DocumentDataOutput, DocumentMetricsOutput, UploadDocumentResult
-from app.agent.dto import DocumentDependency
+from app.agent.dto import DocumentDependency, Message
 from app.agent.document_rewrite_agent import document_rewrite_agent
 from app.agent.document_extract_agent import document_extract_agent
 from app.agent.document_metrics_agent import document_metrics_agent
@@ -97,9 +98,9 @@ class DocumentService:
             return result.output
         except Exception as e: raise HTTPException(status_code=500, detail=f"Failed to extract document: {str(e)}")
 
-    async def rewrite_document(self, input_message: str, session_state: SessionState) -> DocumentDataOutput:
-        deps = DocumentDependency(session_state=session_state)
-        result = await document_rewrite_agent.run(user_prompt=input_message, deps=deps)
+    async def rewrite_document(self, input_message: str, session_state: SessionState, message_history: List[Message] = []) -> DocumentDataOutput:
+        deps = DocumentDependency(session_state=session_state, message_history=message_history)
+        result = await document_rewrite_agent.run(user_prompt=input_message, deps=deps, message_history=message_history)
         return result.output
 
     async def get_document_metrics(self, session_state: SessionState) -> DocumentMetricsOutput:
@@ -120,14 +121,6 @@ class DocumentService:
         file_name = f"{template_name}-{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
         temp_dir = tempfile.gettempdir()
         pdf_path = os.path.join(temp_dir, file_name)
-        html_content = template.render(
-            basics=data.basics,
-            experience=data.experience,
-            skills=data.skills,
-            education=data.education,
-            certificates=data.certificates,
-            projects=data.projects,
-            achievements=data.achievements
-        )
+        html_content = template.render(data.model_dump())
         HTML(string=html_content, base_url=str(template_dir)).write_pdf(pdf_path)
         return file_name, pdf_path

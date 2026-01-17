@@ -1,7 +1,6 @@
 import logging
 from sqlmodel import SQLModel
 from typing import AsyncGenerator
-from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.config import settings

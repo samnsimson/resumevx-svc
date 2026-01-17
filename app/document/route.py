@@ -71,7 +71,7 @@ async def rewrite_document(request: Request, data: RewriteDocumentInput, session
         session_state_service = SessionStateService(session)
         session_state = await session_state_service.get_by_user_id(user_session.local_user.id)
         if not session_state: raise HTTPException(status_code=404, detail="Please upload and parse a document first.")
-        response = await document_service.rewrite_document(session_state=session_state, input_message=data.input_message)
+        response = await document_service.rewrite_document(session_state=session_state, input_message=data.input_message, message_history=data.message_history or [])
         session_state_dto = SessionStateDto(
             user_id=user_session.local_user.id,
             better_auth_session_token=user_session.session.token,

@@ -1,6 +1,7 @@
 from typing import List, Optional, Literal, Dict
 from sqlmodel import Field
 from app.lib.model import BaseModel
+from app.models import Message
 
 
 class UploadDocumentResult(BaseModel):
@@ -82,6 +83,7 @@ class RewriteDocumentRequest(BaseModel):
 
 class RewriteDocumentInput(BaseModel):
     input_message: str = Field(description="Input message from the user")
+    message_history: Optional[List["Message"]] = Field(default=None, description="The message history")
 
 
 class ExtractDocumentRequest(BaseModel):
