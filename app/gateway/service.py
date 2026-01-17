@@ -34,7 +34,7 @@ class GatewayService:
     async def _get_session_state_dto(self, upload_result: UploadDocumentResult, parsed_content: str, extracted_data: DocumentData, data: ProcessInputDto, local_user: User, auth_session: AuthSession) -> SessionStateDto:
         return SessionStateDto(
             user_id=local_user.id,
-            better_auth_session_token=auth_session.token,
+            session_token=auth_session.token,
             document_name=upload_result.filename,
             document_url=upload_result.file_url,
             document_parsed=parsed_content,

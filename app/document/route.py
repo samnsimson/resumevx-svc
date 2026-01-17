@@ -23,7 +23,7 @@ async def upload_document(request: Request, session: TransactionSession, user_se
     result = await document_service.upload_document(file, user_session.local_user.id)
     session_state_dto = SessionStateDto(
         user_id=user_session.local_user.id,
-        better_auth_session_token=user_session.session.token,
+        session_token=user_session.session.token,
         document_name=result.filename,
         document_url=result.file_url
     )
@@ -39,7 +39,7 @@ async def parse_document(request: Request, session: TransactionSession, user_ses
     result = await document_service.parse_document(file)
     session_state_dto = SessionStateDto(
         user_id=user_session.local_user.id,
-        better_auth_session_token=user_session.session.token,
+        session_token=user_session.session.token,
         document_parsed=result
     )
     await session_state_service.create_or_update_session_state(session_state_dto)
@@ -54,7 +54,7 @@ async def extract_document(request: Request, data: ExtractDocumentRequest, sessi
     result = await document_service.extract_document(data.file_content)
     session_state_dto = SessionStateDto(
         user_id=user_session.local_user.id,
-        better_auth_session_token=user_session.session.token,
+        session_token=user_session.session.token,
         document_data=result,
         generated_document_data=result
     )
@@ -74,7 +74,7 @@ async def rewrite_document(request: Request, session: TransactionSession, user_s
         response = await document_service.rewrite_document(session_state=session_state, input_message=data.input_message, message_history=data.message_history or [])
         session_state_dto = SessionStateDto(
             user_id=user_session.local_user.id,
-            better_auth_session_token=user_session.session.token,
+            session_token=user_session.session.token,
             generated_document_data=response.data
         )
         await usage_service.increment_rewrites(user_session.local_user.id)
@@ -108,7 +108,7 @@ async def save_document(request: Request, session: TransactionSession, user_sess
     result = await document_service.save_document(file, user_session.local_user.id)
     await session_state_service.create_or_update_session_state(SessionStateDto(
         user_id=user_session.local_user.id,
-        better_auth_session_token=user_session.session.token,
+        session_token=user_session.session.token,
         document_name=result.filename,
         document_url=result.file_url,
         generated_document_name=result.filename,
@@ -128,6 +128,8 @@ async def get_document_metrics(request: Request, session: TransactionSession, us
         if not session_state.generated_document_data: raise HTTPException(status_code=404, detail="No resume data found. Please extract document data first.")
         if not session_state.job_description: raise HTTPException(status_code=404, detail="No job description found. Please provide a job description first.")
         metrics = await document_service.get_document_metrics(session_state=session_state)
+        session_state_dto = SessionStateDto(user_id=user_session.local_user.id, session_token=user_session.session.token, generated_document_metrics=metrics)
+        await session_state_service.create_or_update_session_state(session_state_dto)
         return metrics
     except HTTPException:
         raise

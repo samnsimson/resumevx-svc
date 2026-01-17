@@ -52,7 +52,7 @@ class Usage(BaseSQLModel, table=True):
 class SessionState(BaseSQLModel, table=True):
     __tablename__ = "session_state"
     user_id: UUID = Field(foreign_key="user.id", ondelete="CASCADE", index=True, description="User ID - references better-auth user via User model")
-    better_auth_session_token: Optional[str] = Field(default=None, nullable=True, index=True, description="Session token from better-auth for reference")
+    session_token: Optional[str] = Field(default=None, nullable=True, index=True, description="Session token from better-auth for reference")
     template_name: Optional[str] = Field(default=None, nullable=True)
     document_name: Optional[str] = Field(default=None, nullable=True)
     document_url: Optional[str] = Field(default=None, nullable=True)

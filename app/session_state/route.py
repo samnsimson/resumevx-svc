@@ -20,7 +20,7 @@ async def save_session_state(session: TransactionSession, user_session: AuthSess
     session_state_service = SessionStateService(session)
     return await session_state_service.create_or_update_session_state(SessionStateDto(
         user_id=user_session.local_user.id,
-        better_auth_session_token=user_session.session.token,
+        session_token=user_session.session.token,
         **data.model_dump()
     ))
 

@@ -115,7 +115,7 @@ class DocumentService:
             raise HTTPException(status_code=400, detail=ERROR_INVALID_TEMPLATE_NAME.format(available_templates=available_templates))
 
         template_dir_name = TEMPLATE_MAP[template_name]
-        template_dir = Path(__file__).parent.parent / "lib" / "templates"
+        template_dir = Path(__file__).parent.parent / "core" / "templates"
         jinja_env = Environment(loader=FileSystemLoader(str(template_dir)))
         template = jinja_env.get_template(f"{template_dir_name}/index.html")
         file_name = f"{template_name}-{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
