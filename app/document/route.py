@@ -1,6 +1,6 @@
 import logging
 from fastapi import APIRouter, File, Request, UploadFile, BackgroundTasks, HTTPException
-from app.document.dto import DocumentData, DocumentDataOutput, DocumentMetricsOutput, ExtractDocumentRequest, GenerateDocumentRequest, RewriteDocumentInput, UploadDocumentResult
+from app.document.dto import DocumentData, DocumentDataOutput, DocumentMetrics, ExtractDocumentRequest, GenerateDocumentRequest, RewriteDocumentInput, UploadDocumentResult
 from app.document.service import DocumentService
 from app.core.annotations import AuthSession, TransactionSession
 from app.core.annotations import UageGuard
@@ -117,7 +117,7 @@ async def save_document(request: Request, session: TransactionSession, user_sess
     return result
 
 
-@router.get("/metrics", operation_id="getDocumentMetrics", response_model=DocumentMetricsOutput)
+@router.get("/metrics", operation_id="getDocumentMetrics", response_model=DocumentMetrics)
 @limiter.limit("10/minute")
 async def get_document_metrics(request: Request, session: TransactionSession, user_session: AuthSession):
     try:

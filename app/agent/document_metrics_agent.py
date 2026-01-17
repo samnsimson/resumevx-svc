@@ -2,14 +2,14 @@ import json
 from pydantic_ai import Agent, RunContext
 from app.agent.dto import DocumentDependency
 from app.agent.models import LLMModel
-from app.document.dto import DocumentMetricsOutput
+from app.document.dto import DocumentMetrics
 from app.agent.prompts import agent_prompts
 
-document_metrics_agent = Agent[DocumentDependency, DocumentMetricsOutput](
+document_metrics_agent = Agent[DocumentDependency, DocumentMetrics](
     name="document_metrics_agent",
     model=LLMModel.openai,
     deps_type=DocumentDependency,
-    output_type=DocumentMetricsOutput,
+    output_type=DocumentMetrics,
     system_prompt=agent_prompts["document_metrics_agent"]["system_prompt"],
     instructions=agent_prompts["document_metrics_agent"]["instructions"],
 )

@@ -12,7 +12,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi import UploadFile, HTTPException
 from app.core.config import settings
 from app.core.database.models import SessionState
-from app.document.dto import DocumentData, DocumentDataOutput, DocumentMetricsOutput, UploadDocumentResult
+from app.document.dto import DocumentData, DocumentDataOutput, DocumentMetrics, UploadDocumentResult
 from app.agent.dto import DocumentDependency, Message
 from app.agent.document_rewrite_agent import document_rewrite_agent
 from app.agent.document_extract_agent import document_extract_agent
@@ -103,7 +103,7 @@ class DocumentService:
         result = await document_rewrite_agent.run(user_prompt=input_message, deps=deps, message_history=message_history)
         return result.output
 
-    async def get_document_metrics(self, session_state: SessionState) -> DocumentMetricsOutput:
+    async def get_document_metrics(self, session_state: SessionState) -> DocumentMetrics:
         deps = DocumentDependency(session_state=session_state)
         prompt = "Analyze the resume against the job description and generate comprehensive metrics including match score, keyword analysis, section alignments, and recommendations."
         result = await document_metrics_agent.run(user_prompt=prompt, deps=deps)

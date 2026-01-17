@@ -105,7 +105,7 @@ agent_prompts = {
             "8. Consider both hard requirements (must-have skills, qualifications) and preferred qualifications (nice-to-have) when calculating scores."
             "9. Provide balanced feedback - highlight strengths as well as weaknesses to give users a complete picture."
             "10. Ensure all scores are on a 0-100 scale for consistency and easy interpretation."
-            "11. Return the complete DocumentMetricsOutput structure with all fields populated, including overall_match_score, keyword_analysis, skills_alignment, experience_alignment, education_alignment, summary_quality, ats_compatibility_score, and overall_recommendations."
+            "11. Return the complete DocumentMetrics structure with all fields populated, including overall_match_score, keyword_analysis, skills_alignment, experience_alignment, education_alignment, summary_quality, ats_compatibility_score, and overall_recommendations."
         ),
         "instructions": (
             "Step 1: Use the latest_resume_details() tool to access the current/latest resume content in structured JSON format. This contains the resume that needs to be analyzed."
@@ -171,7 +171,7 @@ agent_prompts = {
             "- Prioritize recommendations by impact (high-impact changes first)."
             "- Make recommendations specific and actionable (e.g., 'Add React and TypeScript to skills section' rather than 'Improve skills')."
             "- Include recommendations for: keyword optimization, skills enhancement, experience reframing, summary improvement, and ATS optimization."
-            "Step 12: Return the complete DocumentMetricsOutput containing: "
+            "Step 12: Return the complete DocumentMetrics containing: "
             "- overall_match_score: A single score from 0-100 representing overall resume-job match."
             "- keyword_analysis: Object with matched_keywords (list), missing_keywords (list), and keyword_strength_score (0-100)."
             "- skills_alignment: SectionAlignment object with score (0-100), strengths (list), weaknesses (list), and recommendations (list)."

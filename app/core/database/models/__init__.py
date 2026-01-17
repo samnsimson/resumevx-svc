@@ -3,7 +3,7 @@ from uuid import uuid4, UUID
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import DateTime, Field, Relationship, func
 from datetime import datetime, timezone
-from app.document.dto import DocumentData
+from app.document.dto import DocumentData, DocumentMetrics
 from app.core.models import BaseModel
 from pydantic import field_serializer
 
@@ -58,9 +58,11 @@ class SessionState(BaseSQLModel, table=True):
     document_url: Optional[str] = Field(default=None, nullable=True)
     document_parsed: Optional[str] = Field(default=None, nullable=True)
     document_data: Optional[Dict[str, Any]] = Field(sa_type=JSONB, default=None, nullable=True)
+    document_metrics: Optional[Dict[str, Any]] = Field(sa_type=JSONB, default=None, nullable=True)
     generated_document_name: Optional[str] = Field(default=None, nullable=True)
     genereated_document_url: Optional[str] = Field(default=None, nullable=True)
     generated_document_data: Optional[Dict[str, Any]] = Field(sa_type=JSONB, default=None, nullable=True)
+    generated_document_metrics: Optional[Dict[str, Any]] = Field(sa_type=JSONB, default=None, nullable=True)
     job_description: Optional[str] = Field(default=None, nullable=True)
     user: "User" = Relationship(back_populates="session_states")
 
@@ -73,3 +75,13 @@ class SessionState(BaseSQLModel, table=True):
     def serialize_generated_document_data(self, generated_document_data: Dict[str, Any] | None) -> DocumentData | None:
         if not generated_document_data: return None
         return DocumentData(**generated_document_data)
+
+    @field_serializer("document_metrics")
+    def serialize_document_metrics(self, document_metrics: Dict[str, Any] | None) -> DocumentMetrics | None:
+        if not document_metrics: return None
+        return DocumentMetrics(**document_metrics)
+
+    @field_serializer("generated_document_metrics")
+    def serialize_generated_document_metrics(self, generated_document_metrics: Dict[str, Any] | None) -> DocumentMetrics | None:
+        if not generated_document_metrics: return None
+        return DocumentMetrics(**generated_document_metrics)

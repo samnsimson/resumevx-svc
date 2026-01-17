@@ -108,7 +108,7 @@ class SectionAlignment(BaseModel):
     recommendations: List[str] = Field(description="Recommendations to improve this section")
 
 
-class DocumentMetricsOutput(BaseModel):
+class DocumentMetrics(BaseModel):
     overall_match_score: float = Field(description="Overall match score from 0-100 indicating how well the resume matches the job description")
     keyword_analysis: KeywordAnalysis = Field(description="Analysis of keyword matching between resume and job description")
     skills_alignment: SectionAlignment = Field(description="Analysis of skills section alignment with job requirements")
