@@ -1,5 +1,5 @@
-from app.database.models import User
-from app.database.repository import Repository
+from app.core.database.models import User
+from app.core.database.repository import Repository
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 

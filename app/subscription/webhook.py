@@ -1,8 +1,8 @@
 from fastapi import Request, HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
-from app.config import settings
+from app.core.config import settings
 from app.subscription.service import SubscriptionService
-from app.lib.constants import (
+from app.core.constants import (
     ERROR_INVALID_PAYLOAD,
     ERROR_INVALID_SIGNATURE,
 )

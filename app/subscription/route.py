@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request
 from app.subscription.webhook import handle_stripe_webhook
-from app.lib.annotations import TransactionSession
+from app.core.annotations import TransactionSession
 
 router = APIRouter(tags=["subscriptions"])
 

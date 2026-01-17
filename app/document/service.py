@@ -10,15 +10,15 @@ from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML
 from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi import UploadFile, HTTPException
-from app.config import settings
-from app.database.models import SessionState
+from app.core.config import settings
+from app.core.database.models import SessionState
 from app.document.dto import DocumentData, DocumentDataOutput, DocumentMetricsOutput, UploadDocumentResult
 from app.agent.dto import DocumentDependency, Message
 from app.agent.document_rewrite_agent import document_rewrite_agent
 from app.agent.document_extract_agent import document_extract_agent
 from app.agent.document_metrics_agent import document_metrics_agent
-from app.lib.http_client import HttpClient
-from app.lib.constants import TEMPLATE_MAP, ERROR_INVALID_TEMPLATE_NAME
+from app.core.utils.http_client import HttpClient
+from app.core.constants import TEMPLATE_MAP, ERROR_INVALID_TEMPLATE_NAME
 
 
 class DocumentService:

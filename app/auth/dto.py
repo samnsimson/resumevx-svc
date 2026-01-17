@@ -1,8 +1,8 @@
 
 from sqlmodel import Field
-from app.lib.model import BaseModel
+from app.core.models import BaseModel
 from app.auth.model import AuthSession, AuthUser
-from app.database.models import User
+from app.core.database.models import User
 
 
 class AuthUserSession(BaseModel):

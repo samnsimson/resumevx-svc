@@ -1,7 +1,7 @@
 from sqlmodel.ext.asyncio.session import AsyncSession
 from postmarker.core import PostmarkClient
-from app.config import settings
-from app.lib.constants import (
+from app.core.config import settings
+from app.core.constants import (
     EMAIL_FROM_ADDRESS,
     EMAIL_SUBJECT_VERIFY,
     EMAIL_VERIFICATION_BODY_TEMPLATE,

@@ -1,13 +1,13 @@
 import uvicorn
 from fastapi import Depends, FastAPI
-from app.config import settings
+from app.core.config import settings
 from fastapi.middleware.cors import CORSMiddleware
-from app.lib.guards.auth_guard import auth_guard
-from app.lib.limitter import limiter
-from app.middleware.logging_middleware import LoggingMiddleware
+from app.core.guards.auth_guard import auth_guard
+from app.core.limiter import limiter
+from app.core.middleware.logging_middleware import LoggingMiddleware
 from contextlib import asynccontextmanager
-from app.database import Database
-from app.error_handler import setup_error_handlers
+from app.core.database import Database
+from app.core.error_handler import setup_error_handlers
 from app.auth.route import router as auth_router
 from app.user.route import router as user_router
 from app.gateway.route import router as gateway_router

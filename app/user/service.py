@@ -1,6 +1,6 @@
 from uuid import UUID
 from sqlmodel.ext.asyncio.session import AsyncSession
-from app.database.models import User
+from app.core.database.models import User
 from app.user.dto import CreateUserDto, UpdateUserDto
 from app.user.repository import UserRepository
 from fastapi import HTTPException

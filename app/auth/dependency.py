@@ -1,8 +1,8 @@
 from fastapi import Request, HTTPException
 from app.auth.dto import AuthUserSession
 from app.auth.model import AuthSession, AuthUser
-from app.database.models import User
-from app.lib.constants import ERROR_UNAUTHORIZED
+from app.core.database.models import User
+from app.core.constants import ERROR_UNAUTHORIZED
 
 
 def get_session_from_request(request: Request) -> AuthSession:

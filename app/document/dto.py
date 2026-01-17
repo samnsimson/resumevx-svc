@@ -1,7 +1,7 @@
 from typing import List, Optional, Literal, Dict
 from sqlmodel import Field
-from app.lib.model import BaseModel
-from app.models import Message
+from app.core.models import BaseModel
+from app.core.models import Message
 
 
 class UploadDocumentResult(BaseModel):

@@ -1,9 +1,9 @@
 import httpx
 from fastapi import HTTPException, Request
 from app.auth.dto import AuthUserSession
-from app.config import settings
-from app.database import Database
-from app.database.models import User
+from app.core.config import settings
+from app.core.database import Database
+from app.core.database.models import User
 from app.user.service import UserService
 
 

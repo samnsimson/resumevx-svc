@@ -1,7 +1,7 @@
 from typing import Literal
 from llama_cloud import ExtractConfig, ExtractMode
 from llama_cloud_services import ExtractionAgent, LlamaExtract
-from app.config import settings
+from app.core.config import settings
 from app.document.dto import DocumentData
 
 

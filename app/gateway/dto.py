@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 from pydantic import Field
-from app.lib.model import BaseModel
+from app.core.models import BaseModel
 
 
 class EventStatus(str, Enum):

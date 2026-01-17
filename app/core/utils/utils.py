@@ -3,8 +3,8 @@ import string
 from typing import Any, Dict
 from fastapi import HTTPException
 import jwt
-from app.config import settings
-from app.lib.constants import (
+from app.core.config import settings
+from app.core.constants import (
     ERROR_TOKEN_EXPIRED,
     ERROR_INVALID_TOKEN,
 )

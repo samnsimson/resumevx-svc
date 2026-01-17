@@ -2,11 +2,11 @@ from uuid import UUID
 from datetime import datetime, timezone
 from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi import HTTPException
-from app.database.models import Subscription, User
+from app.core.database.models import Subscription, User
 from app.subscription.dto import CreateSubscriptionDto, UpdateSubscriptionDto
 from app.subscription.repository import SubscriptionRepository
 from app.stripe.service import StripeService
-from app.lib.constants import (
+from app.core.constants import (
     ERROR_SUBSCRIPTION_NOT_FOUND,
     ERROR_SUBSCRIPTION_NO_STRIPE_CUSTOMER,
     ERROR_FAILED_TO_CANCEL_SUBSCRIPTION,

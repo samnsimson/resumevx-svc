@@ -5,7 +5,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import DateTime, Field, Relationship, func
 from datetime import datetime, timezone
 from app.document.dto import DocumentData
-from app.lib.model import BaseModel
+from app.core.models import BaseModel
 from pydantic import field_serializer
 
 

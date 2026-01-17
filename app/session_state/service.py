@@ -1,6 +1,6 @@
 from uuid import UUID
 from sqlmodel.ext.asyncio.session import AsyncSession
-from app.database.models import SessionState
+from app.core.database.models import SessionState
 from app.session_state.dto import SessionStateDto
 from app.session_state.repository import SessionStateRepository
 

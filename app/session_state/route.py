@@ -1,7 +1,7 @@
 from fastapi import APIRouter
-from app.lib.annotations import TransactionSession, AuthSession
+from app.core.annotations import TransactionSession, AuthSession
 from app.session_state.service import SessionStateService
-from app.database.models import SessionState
+from app.core.database.models import SessionState
 from app.session_state.dto import SaveSessionStateDto, SessionStateDto
 
 router = APIRouter(tags=["session_state"])

@@ -1,6 +1,6 @@
 from uuid import UUID
-from app.database.models import Subscription
-from app.database.repository import Repository
+from app.core.database.models import Subscription
+from app.core.database.repository import Repository
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 

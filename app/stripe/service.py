@@ -1,9 +1,9 @@
 import stripe
 from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi import HTTPException
-from app.config import settings
-from app.database.models import Plan
-from app.lib.constants import (
+from app.core.config import settings
+from app.core.database.models import Plan
+from app.core.constants import (
     ERROR_FAILED_TO_CREATE_STRIPE_CUSTOMER,
     ERROR_FAILED_TO_CREATE_CHECKOUT_SESSION,
     ERROR_FAILED_TO_CREATE_PORTAL_SESSION,

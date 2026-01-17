@@ -2,10 +2,10 @@ import logging
 from fastapi import APIRouter, File, Request, UploadFile, BackgroundTasks, HTTPException
 from app.document.dto import DocumentData, DocumentDataOutput, DocumentMetricsOutput, ExtractDocumentRequest, GenerateDocumentRequest, RewriteDocumentInput, UploadDocumentResult
 from app.document.service import DocumentService
-from app.lib.annotations import AuthSession, TransactionSession
-from app.lib.annotations import UageGuard
-from app.lib.limitter import limiter
-from app.lib.responses import PDF_RESPONSE_200
+from app.core.annotations import AuthSession, TransactionSession
+from app.core.annotations import UageGuard
+from app.core.limiter import limiter
+from app.core.responses import PDF_RESPONSE_200
 from app.usage.service import UsageService
 from app.session_state.service import SessionStateService
 from app.session_state.dto import SessionStateDto

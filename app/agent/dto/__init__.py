@@ -1,8 +1,8 @@
 from typing import List
 from sqlmodel import Field
-from app.lib.model import BaseModel
-from app.database.models import SessionState
-from app.models import Message
+from app.core.models import BaseModel
+from app.core.database.models import SessionState
+from app.core.models import Message
 
 
 class DocumentDependency(BaseModel):

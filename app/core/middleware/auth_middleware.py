@@ -3,13 +3,13 @@ import logging
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-from app.database import Database
+from app.core.database import Database
 from app.auth.service import AuthService
 from app.session.service import SessionService
 from app.user.service import UserService
 from typing import Set, Pattern
-from app.config import settings
-from app.lib.constants import (
+from app.core.config import settings
+from app.core.constants import (
     ERROR_UNAUTHORIZED,
     ERROR_INVALID_OR_EXPIRED_TOKEN,
     ERROR_USER_OR_SESSION_NOT_FOUND,

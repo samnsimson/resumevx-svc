@@ -1,7 +1,7 @@
 from uuid import UUID
 from sqlmodel import select
-from app.database.models import SessionState
-from app.database.repository import Repository
+from app.core.database.models import SessionState
+from app.core.database.repository import Repository
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 

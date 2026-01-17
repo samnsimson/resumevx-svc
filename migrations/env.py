@@ -1,5 +1,5 @@
 import os
-from app.database.models import *
+from app.core.database.models import *
 from sqlalchemy import pool
 from sqlalchemy import engine_from_config
 from logging.config import fileConfig

@@ -1,7 +1,7 @@
 from uuid import UUID
 from fastapi import HTTPException
-from app.database import Database
-from app.database.models import Usage, Plan, Subscription
+from app.core.database import Database
+from app.core.database.models import Usage, Plan, Subscription
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.subscription.service import SubscriptionService
 from app.usage.service import UsageService

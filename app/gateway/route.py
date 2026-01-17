@@ -4,7 +4,7 @@ from fastapi import APIRouter, File, Form, UploadFile
 from fastapi.responses import StreamingResponse
 from app.gateway.dto import ProcessInputDto
 from app.gateway.service import GatewayService
-from app.lib.annotations import AuthSession, TransactionSession
+from app.core.annotations import AuthSession, TransactionSession
 
 router = APIRouter(tags=['Gateway'])
 

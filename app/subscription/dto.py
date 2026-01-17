@@ -1,8 +1,8 @@
 from typing import Optional
 from uuid import UUID
 from sqlmodel import Field
-from app.lib.model import BaseModel
-from app.database.models import Plan
+from app.core.models import BaseModel
+from app.core.database.models import Plan
 
 
 class CreateSubscriptionDto(BaseModel):

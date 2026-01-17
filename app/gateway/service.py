@@ -6,14 +6,14 @@ from asyncio import Queue, Task
 from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.model import AuthSession
-from app.database.models import User
+from app.core.database.models import User
 from app.document.dto import DocumentData, UploadDocumentResult
 from app.document.service import DocumentService
 from app.gateway.dto import EventStatus, ProcessInputDto, EventResponse
 from app.gateway.emitter import ProgressEmitter
 from app.session_state.dto import SessionStateDto
 from app.session_state.service import SessionStateService
-from app.lib.constants import (
+from app.core.constants import (
     GATEWAY_QUEUE_TIMEOUT,
     GATEWAY_STREAM_CANCELLED,
     GATEWAY_ERROR_IN_STREAM,

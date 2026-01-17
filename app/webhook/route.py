@@ -1,7 +1,7 @@
 from fastapi import APIRouter
-from app.database.models import User
-from app.lib.annotations import TransactionSession
-from app.lib.decorators.public import public
+from app.core.database.models import User
+from app.core.annotations import TransactionSession
+from app.core.utils.decorators.public import public
 from app.user.dto import CreateUserDto, UpdateUserDto
 from app.user.service import UserService
 from app.webhook.dto import UserCreatedPayload, UserDeletedPayload, UserUpdatedPayload

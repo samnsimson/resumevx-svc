@@ -1,6 +1,6 @@
 from uuid import UUID
 from sqlmodel.ext.asyncio.session import AsyncSession
-from app.database.models import Usage
+from app.core.database.models import Usage
 from app.usage.repository import UsageRepository
 
 
