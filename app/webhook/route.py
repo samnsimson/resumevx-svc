@@ -27,6 +27,9 @@ async def user_deleted(payload: UserDeletedPayload, session: TransactionSession)
 @public
 @router.put("/user", operation_id="userUpdated")
 async def user_updated(payload: UserUpdatedPayload, session: TransactionSession):
-    user_service = UserService(session)
-    user_dto = UpdateUserDto(**payload.model_dump(exclude_unset=True))
-    return await user_service.update_local_user(payload.auth_user_id, user_dto)
+    try:
+        user_service = UserService(session)
+        user_dto = UpdateUserDto(**payload.model_dump(exclude_unset=True))
+        return await user_service.update_local_user(payload.auth_user_id, user_dto)
+    except Exception as e:
+        print(f"Error updating user: {str(e)}")

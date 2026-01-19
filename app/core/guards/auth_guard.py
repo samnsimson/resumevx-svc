@@ -41,6 +41,7 @@ async def auth_guard(request: Request) -> None:
 
     try:
         auth_session = await get_auth_session(token)
+        print(f"auth_session: {auth_session}")
         user_data, session_data = await extract_session_data(auth_session)
         local_user = await get_local_user(user_data['id'])
         setattr(request.state, "user", user_data)
