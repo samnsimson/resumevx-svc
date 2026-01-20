@@ -1558,6 +1558,21 @@ wheels = [
 ]
 
 [[package]]
+name = "inngest"
+version = "0.5.13"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "jcs" },
+    { name = "pydantic" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e2/86/c2dd397734ba6b729fd46922996c5dee7f8891e7b23ce2dcc8b6f247156c/inngest-0.5.13.tar.gz", hash = "sha256:fb715ea0339631e60a1fd3ac3f993ac01e9d6c0b0bd4d9acdcaf774da93e3b1f", size = 84663, upload-time = "2025-11-25T02:58:50.267Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/52/d7/6aa9fd5320b27d3247badf62cffe02bef0cbff1ae6294e428f33dd7d0aee/inngest-0.5.13-py3-none-any.whl", hash = "sha256:b4c186f1c8c3952acd25929f8aa062df62bfcddfc7fae592848e57701d81e24e", size = 129461, upload-time = "2025-11-25T02:58:48.716Z" },
+]
+
+[[package]]
 name = "invoke"
 version = "2.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1609,6 +1624,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/0f/27/056e0638a86749374d6f57d0b0db39f29509cce9313cf91bdc0ac4d91084/jaraco_functools-4.4.0.tar.gz", hash = "sha256:da21933b0417b89515562656547a77b4931f98176eb173644c0d35032a33d6bb", size = 19943, upload-time = "2025-12-21T09:29:43.6Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fd/c4/813bb09f0985cb21e959f21f2464169eca882656849adf727ac7bb7e1767/jaraco_functools-4.4.0-py3-none-any.whl", hash = "sha256:9eec1e36f45c818d9bf307c8948eb03b2b56cd44087b3cdc989abca1f20b9176", size = 10481, upload-time = "2025-12-21T09:29:42.27Z" },
+]
+
+[[package]]
+name = "jcs"
+version = "0.2.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/47/e5/9d547f0d42ba00f68eec773aa7b2145e0c0335eb632cbaf519f480a429af/jcs-0.2.1.tar.gz", hash = "sha256:9f20360b2f3b0a410d65493b448f96306d80e37fb46283f3f4aa5db2c7c1472b", size = 6886, upload-time = "2022-04-10T14:41:24.904Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c0/d4/9a99bc15266a842bd14a1913afdb05182888ebab035666c1ce8a64537ca2/jcs-0.2.1-py3-none-any.whl", hash = "sha256:e23a3e1de60f832d33cd811bb9c3b3be79219cdf95f63b88f0972732c3fa8476", size = 7603, upload-time = "2022-04-10T14:41:23.207Z" },
 ]
 
 [[package]]
@@ -3567,6 +3591,7 @@ dependencies = [
     { name = "boto3" },
     { name = "datamodel-code-generator", extra = ["http"] },
     { name = "fastapi", extra = ["standard"] },
+    { name = "inngest" },
     { name = "jinja2" },
     { name = "llama-index" },
     { name = "llama-parse" },
@@ -3595,6 +3620,7 @@ requires-dist = [
     { name = "boto3", specifier = ">=1.34.0" },
     { name = "datamodel-code-generator", extras = ["http"], specifier = ">=0.53.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.127.0" },
+    { name = "inngest", specifier = ">=0.5.13" },
     { name = "jinja2", specifier = ">=3.1.0" },
     { name = "llama-index", specifier = ">=0.14.10" },
     { name = "llama-parse", specifier = ">=0.6.54" },

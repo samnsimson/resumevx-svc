@@ -29,12 +29,13 @@ app = FastAPI(
     dependencies=[Depends(auth_guard)]
 )
 
+
 app.state.limiter = limiter
 
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://frezume.com", "https://www.frezume.com"],
+    allow_origins=["http://localhost:3000", "http://localhost:8288", "https://frezume.com", "https://www.frezume.com"],
     allow_origin_regex=r"https://.*\.frezume\.com",
     allow_credentials=True,
     allow_methods=["*"],
@@ -50,6 +51,8 @@ app.include_router(webhook_router, prefix="/webhook")
 
 
 setup_error_handlers(app)
+# inngest.fast_api.serve(app, inngest_client, [inngest_function])
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host=settings.host, port=settings.port, reload=True)

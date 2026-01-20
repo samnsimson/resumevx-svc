@@ -7,7 +7,7 @@ from app.agent.prompts import agent_prompts
 
 document_rewrite_agent = Agent[DocumentDependency, DocumentDataOutput](
     name="document_rewrite_agent",
-    model=LLMModel.openai,
+    model=LLMModel.rewrite_model,
     deps_type=DocumentDependency,
     output_type=DocumentDataOutput,
     system_prompt=agent_prompts["document_rewrite_agent"]["system_prompt"],

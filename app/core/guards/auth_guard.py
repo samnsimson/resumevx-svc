@@ -34,6 +34,7 @@ async def extract_session_data(auth_session: AuthUserSession | None):
 async def auth_guard(request: Request) -> None:
     endpoint = request.scope.get("endpoint")
     if request.method == "OPTIONS": return
+    if request.url.path.startswith("/api/inngest"): return
     if endpoint and getattr(endpoint, "is_public", False): return
 
     token = request.cookies.get(settings.cookie_key, None)

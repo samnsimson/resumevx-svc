@@ -4,9 +4,9 @@ from app.document.dto import DocumentData
 from app.agent.prompts import agent_prompts
 
 document_extract_agent = Agent[str, DocumentData](
-    name="document_extract_agent",
-    model=LLMModel.openai,
     deps_type=str,
+    name="document_extract_agent",
+    model=LLMModel.extraction_model,
     output_type=DocumentData,
     system_prompt=agent_prompts["document_extract_agent"]["system_prompt"],
     instructions=agent_prompts["document_extract_agent"]["instructions"],
