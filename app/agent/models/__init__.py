@@ -15,6 +15,6 @@ class LLMModel:
     )
 
     rewrite_model = OpenAIChatModel(
-        settings.nebius_extraction_model,
+        settings.nebius_rewrite_model,
         provider=NebiusProvider(api_key=settings.nebius_api_key),
     )

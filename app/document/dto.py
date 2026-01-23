@@ -117,3 +117,7 @@ class DocumentMetrics(BaseModel):
     summary_quality: SectionAlignment = Field(description="Analysis of professional summary quality and relevance")
     ats_compatibility_score: float = Field(description="ATS compatibility score from 0-100 indicating how well the resume will parse through ATS systems")
     overall_recommendations: List[str] = Field(description="Overall recommendations to improve resume match with job description")
+
+
+class CoverLetter(BaseModel):
+    content: str = Field(description="The complete cover letter content in plain text format")

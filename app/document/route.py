@@ -1,6 +1,6 @@
 import logging
 from fastapi import APIRouter, File, Request, UploadFile, BackgroundTasks, HTTPException
-from app.document.dto import DocumentData, DocumentDataOutput, DocumentMetrics, ExtractDocumentRequest, GenerateDocumentRequest, RewriteDocumentInput, UploadDocumentResult
+from app.document.dto import DocumentData, DocumentDataOutput, DocumentMetrics, ExtractDocumentRequest, GenerateDocumentRequest, RewriteDocumentInput, UploadDocumentResult, CoverLetter
 from app.document.service import DocumentService
 from app.core.annotations import AuthSession, TransactionSession
 from app.core.annotations import UageGuard
@@ -136,4 +136,25 @@ async def get_document_metrics(request: Request, session: TransactionSession, us
         raise
     except Exception as e:
         logging.error(f"Failed to get document metrics: {str(e)}")
+        raise
+
+
+@router.post("/cover-letter", operation_id="generateCoverLetter", response_model=CoverLetter)
+@limiter.limit("10/minute")
+async def generate_cover_letter(request: Request, session: TransactionSession, user_session: AuthSession, usage: UageGuard):
+    try:
+        document_service = DocumentService(session)
+        usage_service = UsageService(session)
+        session_state_service = SessionStateService(session)
+        session_state = await session_state_service.get_by_session_token(user_session.session.token)
+        if not session_state: raise HTTPException(status_code=404, detail="Please upload and parse a document first.")
+        if not session_state.generated_document_data: raise HTTPException(status_code=404, detail="No resume data found. Please extract document data first.")
+        if not session_state.job_description: raise HTTPException(status_code=404, detail="No job description found. Please provide a job description first.")
+        cover_letter = await document_service.generate_cover_letter(session_state=session_state)
+        await usage_service.increment_rewrites(user_session.local_user.id)
+        return cover_letter
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Failed to generate cover letter: {str(e)}")
         raise

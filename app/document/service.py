@@ -14,11 +14,12 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi import UploadFile, HTTPException
 from app.core.config import settings
 from app.core.database.models import SessionState
-from app.document.dto import DocumentData, DocumentDataOutput, DocumentMetrics, UploadDocumentResult
+from app.document.dto import DocumentData, DocumentDataOutput, DocumentMetrics, UploadDocumentResult, CoverLetter
 from app.agent.dto import DocumentDependency, Message
 from app.agent.document_rewrite_agent import document_rewrite_agent
 from app.agent.document_extract_agent import document_extract_agent
 from app.agent.document_metrics_agent import document_metrics_agent
+from app.agent.cover_letter_agent import cover_letter_agent
 from app.core.utils.http_client import HttpClient
 from app.core.constants import TEMPLATE_MAP, ERROR_INVALID_TEMPLATE_NAME
 
@@ -129,6 +130,12 @@ class DocumentService:
         deps = DocumentDependency(session_state=session_state)
         prompt = "Analyze the resume against the job description and generate comprehensive metrics including match score, keyword analysis, section alignments, and recommendations."
         result = await document_metrics_agent.run(user_prompt=prompt, deps=deps)
+        return result.output
+
+    async def generate_cover_letter(self, session_state: SessionState) -> CoverLetter:
+        deps = DocumentDependency(session_state=session_state)
+        prompt = "Create a compelling, personalized cover letter that effectively connects the candidate's resume to the specific job requirements. Use the resume data and job description to write a professional cover letter that highlights relevant experience, demonstrates alignment with job requirements, and makes a strong case for why the candidate is an ideal fit."
+        result = await cover_letter_agent.run(user_prompt=prompt, deps=deps)
         return result.output
 
     async def generate_document(self, template_name: str, data: DocumentData) -> tuple[str, str]:
